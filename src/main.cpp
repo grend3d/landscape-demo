@@ -506,7 +506,16 @@ void landscapeGenView::render(gameMain *game) {
 	}
 }
 
+#define _WIN32 1
+#if defined(_WIN32)
+extern "C" {
+int WinMain(int argc, char *argv[]);
+}
+
+int WinMain(int argc, char *argv[]) {
+#else
 int main(int argc, char *argv[]) {
+#endif
 	/*
 	std::cerr << "entering main()" << std::endl;
 	std::cerr << "started SDL context" << std::endl;
@@ -518,8 +527,8 @@ int main(int argc, char *argv[]) {
 
 	try {
 		TRS staticPosition; // default
-		//gameMain *game = new gameMainDevWindow();
-		gameMain *game = new gameMain();
+		gameMain *game = new gameMainDevWindow();
+		//gameMain *game = new gameMain();
 
 	// XXX:  toggle using textures I have locally, don't want to bloat the assets
 	//       folder again
