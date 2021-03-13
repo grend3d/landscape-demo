@@ -1,5 +1,8 @@
 #include "boxSpawner.hpp"
 #include <grend/geometryGeneration.hpp>
+#include <grend/gameEditor.hpp>
+
+using namespace grendx;
 
 boxBullet::boxBullet(entityManager *manager, gameMain *game, glm::vec3 position)
 	: projectile(manager, game, position)
@@ -10,16 +13,10 @@ boxBullet::boxBullet(entityManager *manager, gameMain *game, glm::vec3 position)
 	manager->registerComponent(this, "boxBullet", this);
 
 	if (!model) {
-#if LOCAL_BUILD
-		model = loadScene("test-assets/obj/smoothcube.glb");
-#else
-		gameModel::ptr mod = generate_cuboid(0.3, 0.3, 0.3);
-		model = std::make_shared<gameObject>();
-		compileModel("boxProjectile", mod);
-		setNode("model", model, mod);
-#endif
+		model = loadScene("assets/obj/smoothcube.glb");
 		bindCookedMeshes();
 
+		model->transform.scale = glm::vec3(0.25);
 		lit->radius = 0.15;
 		lit->intensity = 500;
 	}

@@ -86,22 +86,16 @@ void landscapeGenerator::generateLandscape(gameMain *game,
 	//          threads (assignment to mesh material increases use count)
 	static std::mutex landscapemtx;
 
-#define LOCAL_BUILD 0
-#if LOCAL_BUILD
 	if (grassmod == nullptr) {
 		//grassmod = loadScene("./test-assets/obj/crapgrass.glb");
 		//grassmod = loadScene("./test-assets/obj/smoothcube.glb");
-		grassmod = load_object("assets-old/obj/Modular Terrain Hilly/Prop_Grass_Clump_2.obj");
+		grassmod = load_object("assets/obj/Prop_Grass_Clump_2.obj");
 		game->jobs->addDeferred([=] {
 			compileModel("grassclump", grassmod);
 			bindModel(grassmod);
 			return true;
 		});
 	}
-
-#else
-	grassmod = std::make_shared<gameModel>();
-#endif
 
 	gameObject::ptr ret = std::make_shared<gameObject>();
 	std::list<std::future<bool>> futures;
@@ -166,10 +160,11 @@ void landscapeGenerator::generateLandscape(gameMain *game,
 						ptr->hasNode("mesh"), mesh.get(),
 						ptr->getNode("mesh").get(), fug, ptr->getNode("mesh")->idString().c_str(), blarg);
 
+					/*
 					if (mesh) {
 						//std::lock_guard<std::mutex> g(landscapemtx);
 						mesh->meshMaterial = std::make_shared<material>();
-						mesh->meshMaterial->factors.diffuse = {0.15, 0.3, 0.1, 1};
+						mesh->meshMaterial->factors.diffuse = {0.5, 1.0, 0.5, 1};
 						mesh->meshMaterial->factors.ambient = {1, 1, 1, 1};
 						mesh->meshMaterial->factors.specular = {1, 1, 1, 1};
 						mesh->meshMaterial->factors.emissive = {0, 0, 0, 0};
@@ -178,7 +173,8 @@ void landscapeGenerator::generateLandscape(gameMain *game,
 						mesh->meshMaterial->factors.opacity = 1;
 						mesh->meshMaterial->factors.refract_idx = 1.5;
 					}
-					//mesh->meshMaterial = landscapeMaterial;
+					*/
+					mesh->meshMaterial = landscapeMaterial;
 					std::string name = "gen["+std::to_string(int(x))+"]["+std::to_string(int(y))+"]";
 					SDL_Log("FFFFFFF: setting node");
 
