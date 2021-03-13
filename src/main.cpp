@@ -10,7 +10,6 @@
 #include <grend/ecs/rigidBody.hpp>
 #include <grend/ecs/collision.hpp>
 #include <grend/ecs/serializer.hpp>
-#include <grend/ecs/rigidBodySerializer.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -217,11 +216,6 @@ landscapeGenView::landscapeGenView(gameMain *game) : gameView() {
 				//{game->rend->postShaders["tonemap"], game->rend->postShaders["psaa"]},
 				SCREEN_SIZE_X, SCREEN_SIZE_Y));
 
-	game->serializers->add<rigidBodySphereSerializer>();
-	game->serializers->add<syncRigidBodyTransformSerializer>();
-	game->serializers->add<syncRigidBodyPositionSerializer>();
-	game->serializers->add<syncRigidBodyXZVelocitySerializer>();
-
 	// TODO: names are kinda pointless here
 	// TODO: should systems be a state object in gameMain as well?
 	//       they practically are since the entityManager here is, just one
@@ -280,12 +274,16 @@ landscapeGenView::landscapeGenView(gameMain *game) : gameView() {
 		[&, this] (SDL_Event& ev, unsigned flags) {
 			if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_h) {
 				// TODO: log interface
-				/*
-				std::cerr << "Got here! serializing stuff" << std::endl;
-				std::cerr
-					<< game->serializers->serializeEntities((game->entities.get())).dump(4)
-					<< std::endl;
-					*/
+				nlohmann::json compJson;
+
+				for (auto& ent : game->entities->entities) {
+					//std::cerr << ent->typeString() << std::endl;
+					if (game->factories->has(ent->typeString())) {
+						compJson.push_back(ent->serialize(game->entities.get()));
+					}
+				}
+
+				std::cerr << compJson.dump(4) << std::endl;
 			}
 
 			return MODAL_NO_CHANGE;
@@ -528,6 +526,20 @@ int main(int argc, char *argv[]) {
 		TRS staticPosition; // default
 		gameMain *game = new gameMainDevWindow();
 		//gameMain *game = new gameMain();
+
+		// TODO: better way to do this
+#define SERIALIZABLE(T) game->factories->add<T>()
+		SERIALIZABLE(entity);
+		SERIALIZABLE(component);
+
+		SERIALIZABLE(rigidBody);
+		SERIALIZABLE(rigidBodySphere);
+		SERIALIZABLE(rigidBodyBox);
+		SERIALIZABLE(syncRigidBodyTransform);
+		SERIALIZABLE(syncRigidBodyPosition);
+		SERIALIZABLE(syncRigidBodyXZVelocity);
+		//SERIALIZABLE(collisionHandler);
+#undef SERIALIZABLE
 
 	// XXX:  toggle using textures I have locally, don't want to bloat the assets
 	//       folder again
